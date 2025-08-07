@@ -1,0 +1,240 @@
+{
+  "name": "My workflow 3",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1vdEhDWq6yTEZbxktinyYLbdLAmgkWQxc7SyToC-WJ5g",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1vdEhDWq6yTEZbxktinyYLbdLAmgkWQxc7SyToC-WJ5g/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1vdEhDWq6yTEZbxktinyYLbdLAmgkWQxc7SyToC-WJ5g/edit#gid=0"
+        },
+        "options": {}
+      },
+      "id": "6b7610be-e1db-4c73-8896-a287db498247",
+      "name": "Google Sheets Trigger",
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        208,
+        240
+      ],
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "xI2mVIUVNIOamfQ3",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "subject": "Response to Your Admission Inquiry",
+        "message": "=Hello {{ $('Google Sheets Trigger').item.json.Name }} ,\n\nThank you for your inquiry. Here's our response:\n\n{{ $json.output }}\n\nRegards,  \nAdmissions Team\n",
+        "toList": [
+          "={{ $('Google Sheets Trigger').item.json.Email }}"
+        ],
+        "additionalFields": {}
+      },
+      "id": "04434c39-bed8-4195-b01c-a4914e5d4ebe",
+      "name": "Send Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 1,
+      "position": [
+        1024,
+        240
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "RMHveDc85Fh1ciqd",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 5,
+        "unit": "seconds"
+      },
+      "id": "1eba05cd-7ce6-4ad3-891c-e9ce19c2df09",
+      "name": "Wait 48 Hours",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [
+        1232,
+        240
+      ],
+      "webhookId": "4f3ed7d1-a621-4d07-80da-3a921e000369"
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "subject": "Follow-Up: Regarding Your Admission Inquiry",
+        "message": "We hope you found our previous reply helpful. Please feel free to reach out if you have any more questions!",
+        "toList": [
+          "={{ $('Google Sheets Trigger').item.json.Email }}",
+          []
+        ],
+        "additionalFields": {}
+      },
+      "id": "f4d43ad3-9e35-4d89-9203-fb210642d43c",
+      "name": "Follow-Up Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 1,
+      "position": [
+        1424,
+        240
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "RMHveDc85Fh1ciqd",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an admission assistant for a college. The user is interested in the course \"{{ $json.Course }}\" and has asked this: \"{{ $json.Message }}\".\n\nReply politely and professionally, giving relevant course information. If applicable, include similar course options for comparison. Mention average fee details (for example, ₹75,000 – ₹90,000 per year) and common eligibility criteria like 12th pass with good marks in PCM or Commerce, depending on the course.\n\nKeep the tone helpful, concise, and informative.\n",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.1,
+      "position": [
+        544,
+        240
+      ],
+      "id": "9a78c267-9113-4943-80b5-84f60907069d",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        416,
+        448
+      ],
+      "id": "944cd894-4123-4f8b-833e-980e6c601efb",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "RuCKjZrqFhn6glML",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "conversation_history",
+        "contextWindowLength": 3
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        592,
+        496
+      ],
+      "id": "cdc04f18-cc02-48b4-afad-30393c0afe94",
+      "name": "Simple Memory"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email": {
+      "main": [
+        [
+          {
+            "node": "Wait 48 Hours",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 48 Hours": {
+      "main": [
+        [
+          {
+            "node": "Follow-Up Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "726bfcbc-34fd-4034-b3c5-9563758b8fde",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6f927d18d82d8f75f470d1584b0edfc48952b40967ba34b5c2da3912fc68dfd9"
+  },
+  "id": "ZdudDRZX9cXOAoFM",
+  "tags": []
+}

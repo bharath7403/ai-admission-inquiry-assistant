@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>College Form</title>
+  <style>
+    body { font-family: Arial; max-width: 500px; margin: auto; padding: 20px; }
+    input, textarea, button { width: 100%; padding: 10px; margin: 10px 0; }
+    button { background-color: #28a745; color: white; border: none; }
+    #status { font-weight: bold; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h2>College Form</h2>
+  <form id="collegeForm">
+    <input type="text" name="name" placeholder="Name" required>
+    <input type="email" name="email" placeholder="Email" required>
+    <input type="text" name="course" placeholder="Course" required>
+    <textarea name="message" placeholder="Message" required></textarea>
+    <button type="submit">Submit</button>
+    <div id="status"></div>
+  </form>
+
+  <script>
+    const form = document.getElementById('collegeForm');
+    const status = document.getElementById('status');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+
+      try {
+        const res = await fetch('https://script.google.com/macros/s/AKfycbzh2_8e5Qy_58SyIKoWLsxBrURd2NrL7WVgn-udEeIkgHjvSj15SUlJej9rFv-JfNvY/exec', {
+          method: 'POST',
+          mode: 'no-cors', // Avoids CORS errors
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        status.innerText = "✅ Submitted Successfully!";
+        form.reset();
+      } catch (error) {
+        status.innerText = "❌ Network error. Try again.";
+        console.error("Network Error:", error);
+      }
+    });
+  </script>
+</body>
+</html>
